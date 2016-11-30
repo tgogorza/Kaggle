@@ -2,7 +2,8 @@ import pandas as pd
 import random
 import os
 import sys
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
+from ggplot import *
 # Set current dir as working dir
 os.chdir('/home/tomas/Kaggle/Santander')
 
@@ -89,7 +90,7 @@ df.age.value_counts()
 
 #Some graphs and charts
 df['age'].hist(bins=20)
-df['age'].apply(lambda x: log(x)).hist(bins=20)
+df['age'].apply(lambda x: math.log10(x)).hist(bins=20)
 
 ggplot(df, aes('age','renta') + geom_bar() + scale_x_discrete(breaks=[10,20,30,40,50,60,70,80,90,100])
 
@@ -100,19 +101,18 @@ ggplot(df, aes('age','renta',colour='antiguedad')) + geom_point() + facet_wrap('
 #If we plot age vs seniority, we can see a clear lower bound. We'll remove the outliers to the left of that boundary  
 ggplot(df, aes('age','antiguedad')) + geom_point() + geom_abline(slope=10.42,intercept=-170, color='red', thickess=2) + ylim(-10,280) + xlim(15,120)
 limit = lambda x: 10.42 * x - 170
+#Let's calculate how many outliers we have with a strange age-seniority ratio
+agein = len(df[df.antiguedad <= df.age.apply(limit)])
+ageout = len(df[df.antiguedad > df.age.apply(limit)])
+float(ageout) / (agein+ageout)
+#Less than 1%, we can remove this noisy data
 df = df[df.antiguedad <= df.age.apply(limit)]
 ggplot(df, aes('age','antiguedad')) + geom_point() + geom_abline(slope=10.42,intercept=-170, color='red', thickess=2) + ylim(-10,280) + xlim(15,120)
 
-ggplot(df,aes('renta')) + geom_bar()
-
-#dffall = df.query('indfall == \'S\'')
-
-df2 = df.groupby(['age']).size()
-df2 = df2.unstack()
-df2.plot(kind='bar')
 
 
 
 #Split into training data and labels
-df = df.ix[:,:24]
-labels = df.ix[:,24:]
+df.dtypes
+df = df.ix[:,:18]       
+labels = df.ix[:,18:]
