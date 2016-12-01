@@ -43,7 +43,7 @@ df['age'] = pd.to_numeric(df['age'], errors='coerce', downcast='integer')
 df['antiguedad'] = pd.to_numeric(df['antiguedad'], errors='coerce')
 
 #Remove unwanted columns
-df.drop(['fecha_dato','ncodpers','fecha_alta','indfall','nomprov','tipodom'], inplace=True, axis=1)
+df.drop(['fecha_dato','ncodpers','fecha_alta','indfall','nomprov','tipodom','ult_fec_cli_1t'], inplace=True, axis=1)
 
 #Drop rows without country, age, segmento   (we could impute the values, but that could potientially introduce some bias)
 df = df[df.pais_residencia.notnull()]
@@ -59,10 +59,14 @@ TODO
 df.sexo = df.sexo.map(lambda x: 0 if x is 'V' else 1)
 df.indresi = df.indresi.map(lambda x: 0 if x is 'N' else 1)
 df.indext = df.indext.map(lambda x: 0 if x is 'N' else 1)
-#Map segmento to values
-seg_dict = { '01 - TOP':1, '02 - PARTICULARES':2, '03 - UNIVERSITARIO':3}
-df.segmento.replace(seg_dict, inplace=True)
-
+#Map segmento, ind_empleado to values
+df.segmento.replace({ '01 - TOP':0, '02 - PARTICULARES':1, '03 - UNIVERSITARIO':2}, inplace=True)
+df.ind_empleado.replace({ 'N':0, 'F':1, 'B':2, 'A':3}, inplace=True)
+#Map canal_entrada
+df = df[df.canal_entrada.notnull()]
+num_channels = len(df.canal_entrada.unique())
+channel_dict = {str(channel) : num for num, channel in enumerate(df.canal_entrada.unique()) }
+df.canal_entrada = df.canal_entrada.replace(channel_dict)
 #Cut age, income into groups?
 TODO
 
@@ -71,6 +75,14 @@ spa = len(df[df.pais_residencia == 'ES'])
 notspa = len(df[df.pais_residencia != 'ES'])
 float(notspa) / (spa+notspa)
 df.drop(['pais_residencia'], inplace=True, axis=1)
+
+
+#indrel, inderel_1mes, tiprel show more than 99% of the same value, so no use for those columns
+df.indrel_1mes.value_counts()
+df.indrel.value_counts()
+df.tiprel_1mes.value_counts()
+df.conyuemp.value_counts()
+df.drop(['indrel','indrel_1mes', 'tiprel_1mes', 'conyuemp'], inplace=True, axis=1)
 
 #Group countries with less than 6 users to OTHER (not sure it's so useful, data is VERY skewed towards spain)
 #Maybe group ALL countries that ar not Spain into Others? 
@@ -99,7 +111,7 @@ ggplot(df, aes('age','renta',colour='antiguedad')) + geom_point() + ylim(0,0.2e7
 ggplot(df, aes('age','renta',colour='antiguedad')) + geom_point() + facet_wrap('segmento') + ylim(0,0.2e7) + xlim(18.120)
 
 #If we plot age vs seniority, we can see a clear lower bound. We'll remove the outliers to the left of that boundary  
-ggplot(df, aes('age','antiguedad')) + geom_point() + geom_abline(slope=10.42,intercept=-170, color='red', thickess=2) + ylim(-10,280) + xlim(15,120)
+ggplot(df, aes('age','antiguedad',colour='segmento')) + geom_point() + geom_abline(slope=10.42,intercept=-170, color='red', thickess=2) + ylim(-10,280) + xlim(15,120)
 limit = lambda x: 10.42 * x - 170
 #Let's calculate how many outliers we have with a strange age-seniority ratio
 agein = len(df[df.antiguedad <= df.age.apply(limit)])
@@ -114,5 +126,5 @@ ggplot(df, aes('age','antiguedad')) + geom_point() + geom_abline(slope=10.42,int
 
 #Split into training data and labels
 df.dtypes
-df = df.ix[:,:18]       
-labels = df.ix[:,18:]
+df = df.ix[:,:12]       
+labels = df.ix[:,12:]
