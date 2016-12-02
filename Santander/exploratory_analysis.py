@@ -2,8 +2,9 @@ import pandas as pd
 import random
 import os
 import sys
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from ggplot import *
+import seaborn as sns
 # Set current dir as working dir
 os.chdir('/home/tomas/Kaggle/Santander')
 
@@ -69,6 +70,7 @@ channel_dict = {str(channel) : num for num, channel in enumerate(df.canal_entrad
 df.canal_entrada = df.canal_entrada.replace(channel_dict)
 #Cut age, income into groups?
 TODO
+#Create new features to take life status into account (married, children, etc)?
 
 #Countries other than spain represent less than 1%, so I'm just ignoring country column altogether
 spa = len(df[df.pais_residencia == 'ES'])
@@ -95,10 +97,7 @@ df.drop(['indrel','indrel_1mes', 'tiprel_1mes', 'conyuemp'], inplace=True, axis=
 ##Exploratory Analysis
 df.describe()
 df.head(5)
-
-df.age.value_counts()
-
-
+df.info()
 
 #Some graphs and charts
 df['age'].hist(bins=20)
@@ -121,10 +120,12 @@ float(ageout) / (agein+ageout)
 df = df[df.antiguedad <= df.age.apply(limit)]
 ggplot(df, aes('age','antiguedad')) + geom_point() + geom_abline(slope=10.42,intercept=-170, color='red', thickess=2) + ylim(-10,280) + xlim(15,120)
 
+df.plot.hexbin('age','renta','antiguedad',gridsize=25)
 
+#Plot correlations
+corrs = df.corr()
+sns.heatmap(corrs)
+#plt.matshow(corrs)
 
+ggplot(df, aes('ind_nuevo','canal_entrada')) + geom_point()
 
-#Split into training data and labels
-df.dtypes
-df = df.ix[:,:12]       
-labels = df.ix[:,12:]

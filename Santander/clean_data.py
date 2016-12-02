@@ -21,7 +21,7 @@ def clean_data(df):
     df = df[df.canal_entrada.notnull()]
     num_channels = len(df.canal_entrada.unique())
     channel_dict = {str(channel) : num for num, channel in enumerate(df.canal_entrada.unique()) }
-    df.canal_entrada = df.canal_entrada.replace(channel_dict)
+    df.canal_entrada = df.canal_entrada.map(lambda x: channel_dict[x])
     
     ##Remove unwanted columns
     df = df.drop(['fecha_dato','ncodpers','fecha_alta','indfall','nomprov','tipodom','ult_fec_cli_1t'], axis=1)
@@ -47,6 +47,10 @@ def clean_data(df):
     
     #Impute missing values for renta?
     #TODO
+    
+    #Remove rows with no labels
+    withlabel = df.apply(lambda x: x.ix[12:].sum() > 0, axis=1)
+    df = df[withlabel]
     
     return df
     
