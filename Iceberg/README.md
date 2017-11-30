@@ -12,7 +12,7 @@ Statoil, an international energy company operating worldwide, has worked closely
 In this competition, you’re challenged to build an algorithm that automatically identifies if a remotely sensed target is a ship or iceberg. Improvements made will help drive the costs down for maintaining safe working conditions.
 
 ### Dataset
-Training: (1604) images - 95-5 train/cv split 
+Training: (1604) images - 95-5 train/cv split  
 Test:     (8424) images
 
 ### Implementation
