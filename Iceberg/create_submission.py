@@ -23,13 +23,13 @@ tf.set_random_seed(123)
 
 # Restore variables from disk.
 sess = tf.Session()
-saver = tf.train.import_meta_graph('./conv1/conv3.meta')
+saver = tf.train.import_meta_graph('./conv1/conv5.meta')
 saver.restore(sess, tf.train.latest_checkpoint('./conv1/'))
 graph = tf.get_default_graph()
 
 x = graph.get_tensor_by_name("x:0")
 keep_prob = graph.get_tensor_by_name("keep_prob:0")
-output = graph.get_tensor_by_name("activ:0")
+output = graph.get_tensor_by_name("ConvGraph/Output/activ:0")
 print "Model restored"
 # print sess.run(output, feed_dict={x: X_test[:100], keep_prob: 1.0})
 print "Running Predictions"
@@ -40,10 +40,10 @@ pred = list()
 for i in range(total_batch):
     batch_x = X_batches[i]
     result = sess.run(output, feed_dict={x: batch_x, keep_prob: 1.0})
-    pred += list(result.squeeze())
+    pred += [res[1] for res in result]
 
 df['is_iceberg'] = map(lambda n: round(n, 1), pred)
 submission = df[['id', 'is_iceberg']]
-submission.to_csv('./submissions/sub3.csv', index=False)
+submission.to_csv('./submissions/sub5.csv', index=False)
 
 

@@ -52,7 +52,7 @@ def process_input(df):
     # X = np.stack([X, images], axis=3).squeeze()
     if 'is_iceberg' in df:
         is_iceberg = df.is_iceberg.reshape(len(df), 1)
-        Y = is_iceberg  # .squeeze()
+        Y = is_iceberg.squeeze()
         return X, Y
     else:
         return X, None
